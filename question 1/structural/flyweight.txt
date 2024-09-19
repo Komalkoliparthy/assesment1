@@ -1,0 +1,46 @@
+import java.util.HashMap;
+import java.util.Map;
+
+// Flyweight Object
+class TextFormat {
+    private String fontFamily;
+    private String fontStyle;
+    private int fontSize;
+
+    public TextFormat(String fontFamily, String fontStyle, int fontSize) {
+        this.fontFamily = fontFamily;
+        this.fontStyle = fontStyle;
+        this.fontSize = fontSize;
+    }
+
+    public void applyFormat(String text) {
+        System.out.println("Text: " + text + " | Font: " + fontFamily + " | Style: " + fontStyle + " | Size: " + fontSize);
+    }
+}
+
+// Flyweight Factory
+class TextFormatFactory {
+    private static final Map<String, TextFormat> formats = new HashMap<>();
+
+    public static TextFormat getFormat(String fontFamily, String fontStyle, int fontSize) {
+        String key = fontFamily + fontStyle + fontSize;
+        if (!formats.containsKey(key)) {
+            formats.put(key, new TextFormat(fontFamily, fontStyle, fontSize));
+        }
+        return formats.get(key);
+    }
+}
+
+// Client
+public class FlyweightPatternDemo {
+    public static void main(String[] args) {
+        TextFormat boldFormat = TextFormatFactory.getFormat("Arial", "Bold", 12);
+        TextFormat italicFormat = TextFormatFactory.getFormat("Arial", "Italic", 12);
+
+        boldFormat.applyFormat("Hello World!");
+        italicFormat.applyFormat("Design Patterns");
+
+        // Reuse the same format object
+        boldFormat.applyFormat("Flyweight Pattern");
+    }
+}

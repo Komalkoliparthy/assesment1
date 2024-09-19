@@ -1,0 +1,56 @@
+// Handler Interface
+abstract class EventNotifier {
+    protected EventNotifier nextNotifier;
+
+    public void setNextNotifier(EventNotifier nextNotifier) {
+        this.nextNotifier = nextNotifier;
+    }
+
+    public abstract void notifyEvent(String event, String severity);
+}
+
+// Concrete Handlers
+class ITDepartment extends EventNotifier {
+    @Override
+    public void notifyEvent(String event, String severity) {
+        if (severity.equals("High")) {
+            System.out.println("IT Department handles high severity event: " + event);
+        } else if (nextNotifier != null) {
+            nextNotifier.notifyEvent(event, severity);
+        }
+    }
+}
+
+class HRDepartment extends EventNotifier {
+    @Override
+    public void notifyEvent(String event, String severity) {
+        if (severity.equals("Medium")) {
+            System.out.println("HR Department handles medium severity event: " + event);
+        } else if (nextNotifier != null) {
+            nextNotifier.notifyEvent(event, severity);
+        }
+    }
+}
+
+class GeneralDepartment extends EventNotifier {
+    @Override
+    public void notifyEvent(String event, String severity) {
+        System.out.println("General Department handles low severity event: " + event);
+    }
+}
+
+// Client
+public class ChainOfResponsibilityDemo {
+    public static void main(String[] args) {
+        EventNotifier it = new ITDepartment();
+        EventNotifier hr = new HRDepartment();
+        EventNotifier general = new GeneralDepartment();
+
+        it.setNextNotifier(hr);
+        hr.setNextNotifier(general);
+
+        it.notifyEvent("Server down", "High");
+        it.notifyEvent("Employee complaint", "Medium");
+        it.notifyEvent("Printer maintenance", "Low");
+    }
+}

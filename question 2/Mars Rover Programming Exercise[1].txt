@@ -1,0 +1,249 @@
+import java.util.*;
+
+// Interface for Command Pattern
+interface Command {
+    void execute();
+}
+
+// Enum for directions to avoid conditional checks
+enum Direction {
+    N, E, S, W;
+
+    // Turning left from current direction
+    public Direction turnLeft() {
+        return values()[(ordinal() + 3) % 4]; // (3 steps back in a cyclic way)
+    }
+
+    // Turning right from current direction
+    public Direction turnRight() {
+        return values()[(ordinal() + 1) % 4]; // (1 step forward in a cyclic way)
+    }
+
+    // Return the full name of the direction for final report
+    public String fullName() {
+        switch (this) {
+            case N: return "North";
+            case E: return "East";
+            case S: return "South";
+            case W: return "West";
+            default: return "";
+        }
+    }
+}
+
+// Rover Class that encapsulates the Mars Rover's state and behavior
+class Rover {
+    private int x, y;
+    private Direction direction;
+    private Grid grid;
+
+    // Constructor to initialize the Rover's position and direction
+    public Rover(int startX, int startY, Direction startDirection, Grid grid) {
+        this.x = startX;
+        this.y = startY;
+        this.direction = startDirection;
+        this.grid = grid;
+    }
+
+    // Move one step forward based on current direction
+    public void move() {
+        int newX = x, newY = y;
+        switch (direction) {
+            case N:
+                newY++;
+                break;
+            case E:
+                newX++;
+                break;
+            case S:
+                newY--;
+                break;
+            case W:
+                newX--;
+                break;
+        }
+        if (grid.isWithinBounds(newX, newY) && !grid.hasObstacle(newX, newY)) {
+            x = newX;
+            y = newY;
+        } // No need to print during movement; we'll print the final status later
+    }
+
+    // Turn the rover left
+    public void turnLeft() {
+        direction = direction.turnLeft();
+    }
+
+    // Turn the rover right
+    public void turnRight() {
+        direction = direction.turnRight();
+    }
+
+    // Report the current status in the required format
+    public String reportStatus() {
+        return "Final Position: (" + x + ", " + y + ", " + direction + ")\n" +
+               "Status Report: \"Rover is at (" + x + ", " + y + ") facing " + direction.fullName() + ". No Obstacles detected.\"";
+    }
+
+    // Getters for Rover's position and direction
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public Direction getDirection() { return direction; }
+}
+
+// Command for moving the Rover forward
+class MoveCommand implements Command {
+    private Rover rover;
+
+    public MoveCommand(Rover rover) {
+        this.rover = rover;
+    }
+
+    @Override
+    public void execute() {
+        rover.move();
+    }
+}
+
+// Command for turning the Rover left
+class TurnLeftCommand implements Command {
+    private Rover rover;
+
+    public TurnLeftCommand(Rover rover) {
+        this.rover = rover;
+    }
+
+    @Override
+    public void execute() {
+        rover.turnLeft();
+    }
+}
+
+// Command for turning the Rover right
+class TurnRightCommand implements Command {
+    private Rover rover;
+
+    public TurnRightCommand(Rover rover) {
+        this.rover = rover;
+    }
+
+    @Override
+    public void execute() {
+        rover.turnRight();
+    }
+}
+
+// Composite Pattern for Grid and Obstacle management
+class Grid {
+    private int width, height;
+    private Set<Point> obstacles;
+
+    // Constructor to initialize grid with given width and height, and obstacles
+    public Grid(int width, int height, List<Point> obstaclePositions) {
+        this.width = width;
+        this.height = height;
+        this.obstacles = new HashSet<>(obstaclePositions);
+    }
+
+    // Check if the coordinates are within grid bounds
+    public boolean isWithinBounds(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    // Check if there is an obstacle at the given coordinates
+    public boolean hasObstacle(int x, int y) {
+        return obstacles.contains(new Point(x, y));
+    }
+}
+
+// Class to represent a 2D point (used for obstacles)
+class Point {
+    private final int x, y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // Overriding equals and hashCode to ensure correct set operations
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Point point = (Point) obj;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+}
+
+// Main Class
+public class MarsRoverSimulationWithInput {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input: Grid size
+        System.out.print("Enter Grid Size (width height): ");
+        int gridWidth = scanner.nextInt();
+        int gridHeight = scanner.nextInt();
+
+        // Input: Starting position and direction
+        System.out.print("Enter Starting Position (x y direction[N/S/E/W]): ");
+        int startX = scanner.nextInt();
+        int startY = scanner.nextInt();
+        Direction startDirection = Direction.valueOf(scanner.next().toUpperCase());
+
+        // Input: Number of obstacles
+        System.out.print("Enter number of obstacles: ");
+        int obstacleCount = scanner.nextInt();
+        List<Point> obstacles = new ArrayList<>();
+        for (int i = 0; i < obstacleCount; i++) {
+            System.out.print("Enter obstacle position (x y): ");
+            int obsX = scanner.nextInt();
+            int obsY = scanner.nextInt();
+            obstacles.add(new Point(obsX, obsY));
+        }
+
+        // Initialize the grid with obstacles
+        Grid grid = new Grid(gridWidth, gridHeight, obstacles);
+
+        // Initialize the Rover with starting position and grid
+        Rover rover = new Rover(startX, startY, startDirection, grid);
+
+        // Input: Commands
+        System.out.print("Enter commands (M for move, L for left, R for right): ");
+        String commandsInput = scanner.next();
+        char[] commandsArray = commandsInput.toCharArray();
+
+        // List of commands to execute
+        List<Command> commands = new ArrayList<>();
+        for (char commandChar : commandsArray) {
+            switch (commandChar) {
+                case 'M':
+                    commands.add(new MoveCommand(rover));
+                    break;
+                case 'L':
+                    commands.add(new TurnLeftCommand(rover));
+                    break;
+                case 'R':
+                    commands.add(new TurnRightCommand(rover));
+                    break;
+                default:
+                    System.out.println("Invalid command: " + commandChar);
+            }
+        }
+
+        // Execute the sequence of commands
+        for (Command command : commands) {
+            command.execute();
+        }
+
+        // Print the final status of the Rover in the correct format
+        System.out.println(rover.reportStatus());
+
+        scanner.close();
+    }
+}

@@ -1,0 +1,52 @@
+// Prototype Interface
+interface Shape extends Cloneable {
+    Shape clone();
+    void draw();
+}
+
+// Concrete Prototype
+class Circle implements Shape {
+    @Override
+    public Shape clone() {
+        try {
+            return (Shape) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Clone not supported", e);
+        }
+    }
+
+    @Override
+    public void draw() {
+        System.out.println("Drawing a Circle");
+    }
+}
+
+// Concrete Prototype
+class Rectangle implements Shape {
+    @Override
+    public Shape clone() {
+        try {
+            return (Shape) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Clone not supported", e);
+        }
+    }
+
+    @Override
+    public void draw() {
+        System.out.println("Drawing a Rectangle");
+    }
+}
+
+// Client
+public class PrototypePatternDemo {
+    public static void main(String[] args) {
+        Shape circlePrototype = new Circle();
+        Shape clonedCircle = circlePrototype.clone();
+        clonedCircle.draw();  // Drawing a Circle
+
+        Shape rectanglePrototype = new Rectangle();
+        Shape clonedRectangle = rectanglePrototype.clone();
+        clonedRectangle.draw();  // Drawing a Rectangle
+    }
+}

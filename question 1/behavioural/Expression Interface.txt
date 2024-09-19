@@ -1,0 +1,66 @@
+// Expression Interface
+interface Expression {
+    void interpret();
+}
+
+// Concrete Expressions
+class PrintExpression implements Expression {
+    private String message;
+
+    public PrintExpression(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void interpret() {
+        System.out.println("Print: " + message);
+    }
+}
+
+class AddExpression implements Expression {
+    private int a, b;
+
+    public AddExpression(int a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    @Override
+    public void interpret() {
+        System.out.println("Result: " + (a + b));
+    }
+}
+
+class ExitExpression implements Expression {
+    @Override
+    public void interpret() {
+        System.out.println("Exiting...");
+        System.exit(0);
+    }
+}
+
+// Interpreter
+class CommandLineInterpreter {
+    public static Expression interpret(String command) {
+        if (command.startsWith("Print ")) {
+            return new PrintExpression(command.substring(6));
+        } else if (command.startsWith("Add ")) {
+            String[] tokens = command.substring(4).split(" ");
+            int a = Integer.parseInt(tokens[0]);
+            int b = Integer.parseInt(tokens[1]);
+            return new AddExpression(a, b);
+        } else if (command.equals("Exit")) {
+            return new ExitExpression();
+        }
+        return null;
+    }
+}
+
+// Client
+public class InterpreterPatternDemo {
+    public static void main(String[] args) {
+        CommandLineInterpreter.interpret("Print Hello World!").interpret();
+        CommandLineInterpreter.interpret("Add 5 10").interpret();
+        CommandLineInterpreter.interpret("Exit").interpret();
+    }
+}

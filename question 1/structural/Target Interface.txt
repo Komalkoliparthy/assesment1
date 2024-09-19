@@ -1,0 +1,57 @@
+// Target Interface
+interface PaymentGateway {
+    void makePayment(double amount);
+}
+
+// Adaptee 1
+class PayPal {
+    public void processPayment(double amount) {
+        System.out.println("Processing payment of $" + amount + " via PayPal");
+    }
+}
+
+// Adaptee 2
+class Stripe {
+    public void processCharge(double amount) {
+        System.out.println("Charging $" + amount + " via Stripe");
+    }
+}
+
+// Adapter for PayPal
+class PayPalAdapter implements PaymentGateway {
+    private PayPal payPal;
+
+    public PayPalAdapter(PayPal payPal) {
+        this.payPal = payPal;
+    }
+
+    @Override
+    public void makePayment(double amount) {
+        payPal.processPayment(amount);
+    }
+}
+
+// Adapter for Stripe
+class StripeAdapter implements PaymentGateway {
+    private Stripe stripe;
+
+    public StripeAdapter(Stripe stripe) {
+        this.stripe = stripe;
+    }
+
+    @Override
+    public void makePayment(double amount) {
+        stripe.processCharge(amount);
+    }
+}
+
+// Client
+public class AdapterPatternDemo {
+    public static void main(String[] args) {
+        PaymentGateway paypal = new PayPalAdapter(new PayPal());
+        paypal.makePayment(100.0);
+
+        PaymentGateway stripe = new StripeAdapter(new Stripe());
+        stripe.makePayment(200.0);
+    }
+}
